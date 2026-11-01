@@ -107,10 +107,8 @@ function bold(s) { return esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(
 
 function renderNotes() {
   const group = (title, list) => list.length ? `<section class="sec"><h2>${title}</h2><div class="rows">${list.map(lineHTML).join("")}</div></section>` : "";
-  const talk = LESSON.talk.map(r => ({ id: r.a, zh: r.zh, py: r.py, en: r.en }));
   $("view").innerHTML = `<p style="margin:0 0 14px">You'll learn to ${bold(LESSON.goal)}</p>` +
     group("Sentences", cards.filter(c => c.kind === "s")) + group("Words", cards.filter(c => c.kind === "w")) +
-    `<section class="sec"><h2>Conversation</h2><div class="rows">${talk.map(lineHTML).join("")}</div></section>` +
     `<section class="sec"><h2>Test yourself</h2><div class="rows">${LESSON.test.map(r => `<button type="button" class="reveal" data-a="${r.a}" data-zh="${esc(r.zh)}" data-text="${esc(r.zh + "  " + r.py)}"><span>${esc(r.q)}</span><em>Show</em></button>`).join("")}</div></section>` +
     `<section class="sec"><h2>Tips</h2>${LESSON.tips.map(t => `<p class="tip">${bold(t)}</p>`).join("")}</section>`;
 }
