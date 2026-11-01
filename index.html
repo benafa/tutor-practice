@@ -189,9 +189,10 @@ function renderSend() {
   $("view").innerHTML = `<div class="split">
     <div class="phone"><iframe src="${state.link}" title="Ben's practice page"></iframe></div>
     <section class="panel"><h2>Here's what Ben gets</h2>
-      <p class="hint">Nothing has gone to Ben yet. Try a few cards as Ben and tap Again on some. Then send him the link.</p>
+      <p class="hint">Nothing has gone to Ben yet. Try a few cards as Ben and tap Again on some.</p>
       <div class="stack" style="margin-top:14px">
-        <button type="button" class="btn" id="copy">Copy Ben's link</button>
+        <a class="btn" href="${state.link}" target="_blank" rel="noopener" id="open">See Ben's practice</a>
+        <button type="button" class="btn ghost" id="copy">Copy Ben's link</button>
         <p class="hint" id="copied" hidden>Copied. Paste it in your chat with Ben.</p>
         <button type="button" class="btn ghost" id="next">See Ben's results</button>
       </div></section></div>`;
