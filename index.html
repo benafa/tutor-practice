@@ -79,12 +79,14 @@ textarea { min-height: 84px; resize: vertical; }
 <script>
 const STEPS = ["1 · Add lesson", "2 · Review", "3 · Send", "4 · Results"];
 const STARRED = ["我做了按摩。", "我没有做按摩。"];
-const cards = LESSON.cards.map(c => ({ ...c, on: true, star: STARRED.includes(c.zh) }));
+const cards = LESSON.cards.map(c => ({ ...c, recorded: c.zh, on: true, star: STARRED.includes(c.zh) }));
 const state = { step: 0, reached: 0, note: "Nice work today! Spend a few minutes on 了 and 没有 before our next lesson.", sent: [], link: "" };
 let added = 0;
 
 const chosen = () => cards.filter(c => c.on);
 const byId = id => cards.find(c => c.id === id);
+// A recording only matches the Chinese it was made from, so an edited card uses the device's voice
+const clipId = c => c.recorded && c.recorded !== c.zh ? "new-" + c.id : c.id;
 
 function go(n) {
   player.pause();
@@ -171,7 +173,7 @@ function updateCount() {
 }
 
 function send() {
-  state.sent = chosen();
+  state.sent = chosen().map(c => ({ ...c, id: clipId(c) }));
   const pack = { t: LESSON.title, n: state.note, c: state.sent.map(c => [c.id, c.zh, c.py, c.en, c.kind, c.star ? 1 : 0]) };
   state.link = "student.html#" + encodePack(pack);
   writeResults({});
@@ -226,7 +228,7 @@ document.addEventListener("click", e => {
   const t = e.target.closest("[data-go],[data-star],[data-say]");
   if (!t) return;
   if (t.dataset.go !== undefined) return go(Number(t.dataset.go));
-  if (t.dataset.say) { const c = byId(t.dataset.say); return playCard(c.id, c.zh); }
+  if (t.dataset.say) { const c = byId(t.dataset.say); return playCard(clipId(c), c.zh); }
   const c = byId(t.dataset.star);
   c.star = !c.star;
   t.setAttribute("aria-pressed", c.star);
