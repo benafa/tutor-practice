@@ -29,9 +29,6 @@
 .working p { margin: 8px 0; color: var(--muted); }
 .working p.on { color: var(--ink); font-weight: 600; }
 .working p.done { color: var(--accent-text); }
-.notes { margin-top: 10px; }
-summary { min-height: 44px; display: flex; align-items: center; font-weight: 600; cursor: pointer; }
-.notes pre { margin: 0; padding: 12px; border-radius: 10px; background: var(--bg); font: 400 .95rem/1.7 var(--font-hanzi); white-space: pre-wrap; overflow-wrap: anywhere; }
 .row { display: grid; grid-template-columns: 24px minmax(0,1fr) auto; gap: 8px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
 .row input[type=checkbox] { width: 22px; height: 22px; margin: 0; accent-color: var(--accent); }
 .row.off .tx { opacity: .45; }
@@ -145,8 +142,7 @@ function sectionHTML(title, list) {
 
 function renderReview() {
   $("view").innerHTML = `<section class="panel"><h2>Here are all the cards from your lesson</h2>
-      <p class="hint">Tap any text to fix it. Tap ★ First on what Ben should practise first. Untick anything you don't want to send.</p>
-      <details class="notes"><summary>Your notes: ${esc(LESSON.file)}</summary><pre>${esc(LESSON.notes)}</pre></details></section>
+      <p class="hint">Tap any text to fix it. Tap ★ First on what Ben should practise first. Untick anything you don't want to send.</p></section>
     <section class="panel">${sectionHTML("Sentences", cards.filter(c => c.kind === "s"))}${sectionHTML("Words", cards.filter(c => c.kind === "w"))}</section>
     <section class="panel"><h2>Add a card</h2><form class="add" id="add">
       <input id="newzh" placeholder="Chinese" aria-label="Chinese" required>
