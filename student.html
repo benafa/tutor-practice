@@ -76,7 +76,7 @@ function buildQueue() {
 function optionsHTML() {
   const chip = (label, attr, on) => `<button type="button" class="chip" ${attr} aria-pressed="${on}">${label}</button>`;
   const filters = state.tab === "practice" ? [["all", "All"], ["w", "Words"], ["s", "Sentences"]].map(([k, l]) => chip(l, `data-filter="${k}"`, state.filter === k)).join("") : "";
-  return filters + chip(state.voice === "m" ? "Male voice" : "Female voice", "data-voice", false) + chip("Slow", "data-slow", state.slow);
+  return filters + chip(state.voice === "m" ? "Voice: male" : "Voice: female", "data-voice", false) + chip("Slow", "data-slow", state.slow);
 }
 
 function renderPractice() {
@@ -92,12 +92,12 @@ function renderPractice() {
     };
     return;
   }
-  $("view").innerHTML = top + `<div class="card">${c.star ? `<div class="badge">★ From your tutor</div>` : ""}
+  $("view").innerHTML = top + (state.shown ? "" : `<p class="count">Say it out loud, then check the meaning.</p>`) + `<div class="card">${c.star ? `<div class="badge">★ Start here</div>` : ""}
       <div class="zh">${esc(c.zh)}</div><div class="py">${esc(c.py)}</div>${state.shown ? `<div class="eng">${esc(c.en)}</div>` : ""}
       <button type="button" class="say" data-play="${c.id}" aria-label="Play">${ICON_SOUND}</button></div>
     <div class="acts">${state.shown
       ? `<button type="button" class="btn again" data-mark="0">Again</button><button type="button" class="btn" data-mark="1">Got it</button>`
-      : `<button type="button" class="btn wide" id="reveal">Show answer</button>`}</div>`;
+      : `<button type="button" class="btn wide" id="reveal">Show meaning</button>`}</div>`;
 }
 
 function lineHTML(c) {
@@ -108,9 +108,9 @@ function bold(s) { return esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(
 function renderNotes() {
   const group = (title, list) => list.length ? `<section class="sec"><h2>${title}</h2><div class="rows">${list.map(lineHTML).join("")}</div></section>` : "";
   $("view").innerHTML = `<p style="margin:0 0 14px">You'll learn to ${bold(LESSON.goal)}</p>` +
-    group("Sentences", cards.filter(c => c.kind === "s")) + group("Words", cards.filter(c => c.kind === "w")) +
-    `<section class="sec"><h2>Test yourself</h2><div class="rows">${LESSON.test.map(r => `<button type="button" class="reveal" data-a="${r.a}" data-zh="${esc(r.zh)}" data-text="${esc(r.zh + "  " + r.py)}"><span>${esc(r.q)}</span><em>Show</em></button>`).join("")}</div></section>` +
-    `<section class="sec"><h2>Tips</h2>${LESSON.tips.map(t => `<p class="tip">${bold(t)}</p>`).join("")}</section>`;
+    `<section class="sec"><h2>From the lesson: test yourself</h2><div class="rows">${LESSON.test.map(r => `<button type="button" class="reveal" data-a="${r.a}" data-zh="${esc(r.zh)}" data-text="${esc(r.zh + "  " + r.py)}"><span>${esc(r.q)}</span><em>Show</em></button>`).join("")}</div></section>` +
+    `<section class="sec"><h2>From the lesson: tips</h2>${LESSON.tips.map(t => `<p class="tip">${bold(t)}</p>`).join("")}</section>` +
+    group("Sentences", cards.filter(c => c.kind === "s")) + group("Words", cards.filter(c => c.kind === "w"));
 }
 
 function render() {

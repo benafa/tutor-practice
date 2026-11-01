@@ -29,7 +29,7 @@
 .working p { margin: 8px 0; color: var(--muted); }
 .working p.on { color: var(--ink); font-weight: 600; }
 .working p.done { color: var(--accent-text); }
-.row { display: grid; grid-template-columns: 24px minmax(0,1fr) auto; gap: 8px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+.row { display: grid; grid-template-columns: 24px minmax(0,1fr); gap: 4px 8px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
 .row input[type=checkbox] { width: 22px; height: 22px; margin: 0; accent-color: var(--accent); }
 .row.off .tx { opacity: .45; }
 .tx input { display: block; width: 100%; padding: 1px 6px; margin-left: -6px; border: 1px solid transparent; border-radius: 6px; background: transparent; }
@@ -37,7 +37,7 @@
 .tx .f-zh { font-family: var(--font-hanzi); font-size: 1.15rem; font-weight: 500; }
 .tx .f-py { color: var(--muted); font-size: .875rem; }
 .tx .f-en { font-size: .95rem; }
-.acts { display: flex; gap: 6px; align-items: center; }
+.acts { grid-column: 2; display: flex; gap: 6px; align-items: center; }
 .first { min-height: 44px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--muted); font-size: .8rem; font-weight: 700; white-space: nowrap; }
 .first[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .add { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)) auto; gap: 8px; }
@@ -48,7 +48,7 @@ textarea { min-height: 84px; resize: vertical; }
 .bar { position: sticky; bottom: 0; padding: 12px 0 calc(12px + env(safe-area-inset-bottom)); background: linear-gradient(transparent, var(--bg) 22%); }
 .split { display: grid; grid-template-columns: 340px minmax(0,1fr); gap: 20px; align-items: start; }
 .phone { width: 100%; max-width: 340px; margin: 0 auto; border: 8px solid var(--ink); border-radius: 30px; overflow: hidden; background: var(--bg); }
-.phone iframe { display: block; width: 100%; height: 620px; border: 0; }
+.phone iframe { display: block; width: 100%; height: 760px; border: 0; }
 .stack { display: grid; gap: 10px; }
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
 .stat { background: var(--bg); border-radius: 12px; padding: 12px 8px; text-align: center; }
@@ -57,6 +57,7 @@ textarea { min-height: 84px; resize: vertical; }
 .miss { padding: 8px 0; border-top: 1px solid var(--line); }
 @media (max-width: 680px) {
   .split { grid-template-columns: minmax(0,1fr); }
+  .split .panel { order: -1; margin-bottom: 0; }
   .panel { padding: 16px; }
   .add { grid-template-columns: minmax(0,1fr); }
   .add .btn { width: 100%; }
@@ -64,17 +65,17 @@ textarea { min-height: 84px; resize: vertical; }
 </style>
 </head>
 <body>
-<div class="banner">Prototype. It loads one real lesson that's already been prepared.</div>
+<div class="banner">Prototype. Nothing really goes to Ben.</div>
 <main class="wrap">
-  <h1>Turn a lesson into practice</h1>
-  <p class="sub">You're the tutor. Add a lesson, choose what your student Ben should practise, and send it to him.</p>
+  <div id="intro"><h1>Turn a lesson into practice</h1>
+  <p class="sub">You're the tutor. Add a lesson, choose what your student Ben should practise, and send it to him.</p></div>
   <ol class="steps" id="steps"></ol>
   <div id="view"></div>
 </main>
 <script src="shared.js"></script>
 <script src="lesson.js"></script>
 <script>
-const STEPS = ["1 · Add lesson", "2 · Review", "3 · Send", "4 · Results"];
+const STEPS = ["1 · Add lesson", "2 · Choose cards", "3 · Send to Ben", "4 · Results"];
 const STARRED = ["我做了按摩。", "我没有做按摩。"];
 const cards = LESSON.cards.map(c => ({ ...c, recorded: c.zh, on: true, star: STARRED.includes(c.zh) }));
 const state = { step: 0, reached: 0, note: "Nice work today! Spend a few minutes on 了 and 没有 before our next lesson.", sent: [], link: "" };
@@ -88,6 +89,7 @@ const clipId = c => c.recorded && c.recorded !== c.zh ? "new-" + c.id : c.id;
 function go(n) {
   player.pause();
   state.step = n; state.reached = Math.max(state.reached, n);
+  if (n === 2) buildLink();
   render(); window.scrollTo(0, 0);
 }
 
@@ -103,8 +105,7 @@ function whoHTML(extra) {
 function renderAdd() {
   $("view").innerHTML = `<section class="panel">
     ${whoHTML("Beginner Mandarin")}
-    <button type="button" class="drop" id="drop"><b>Add today's lesson</b><span>PDF, slides or notes</span></button>
-    <p class="hint">In this prototype, this loads real lesson notes: “${esc(LESSON.file)}”.</p>
+    <button type="button" class="drop" id="drop"><b>Add today's lesson</b><span>Tap to load a sample lesson</span></button>
   </section>`;
   $("drop").onclick = work;
 }
@@ -142,7 +143,7 @@ function sectionHTML(title, list) {
 
 function renderReview() {
   $("view").innerHTML = `<section class="panel"><h2>Here are all the cards from your lesson</h2>
-      <p class="hint">Tap any text to fix it. Tap ★ First on what Ben should practise first. Untick anything you don't want to send.</p></section>
+      <p class="hint">Tap any text to fix it. Tap ★ First on what Ben should practise first. Untick anything you don't want to send. Two are starred to match your message.</p></section>
     <section class="panel">${sectionHTML("Sentences", cards.filter(c => c.kind === "s"))}${sectionHTML("Words", cards.filter(c => c.kind === "w"))}</section>
     <section class="panel"><h2>Add a card</h2><form class="add" id="add">
       <input id="newzh" placeholder="Chinese" aria-label="Chinese" required>
@@ -156,39 +157,46 @@ function renderReview() {
   $("add").onsubmit = e => {
     e.preventDefault();
     const zh = $("newzh").value.trim();
-    cards.push({ id: "new" + (++added), zh, py: $("newpy").value.trim(), en: $("newen").value.trim(), kind: /[。？！]/.test(zh) ? "s" : "w", core: true, on: true, star: false });
+    const id = "new" + (++added);
+    cards.push({ id, zh, py: $("newpy").value.trim(), en: $("newen").value.trim(), kind: /[。？！]/.test(zh) ? "s" : "w", on: true, star: false });
     render();
+    const row = document.querySelector(`[data-row="${id}"]`);
+    row.querySelector(".acts").insertAdjacentHTML("beforeend", `<span class="hint" style="margin:0">Added</span>`);
+    row.scrollIntoView({ block: "center" });
   };
   $("send").onclick = send;
 }
 
 function updateCount() {
   const n = chosen().length, b = $("send");
-  b.textContent = `Send ${n} card${n === 1 ? "" : "s"} to Ben`;
+  b.textContent = "See what Ben gets";
   b.disabled = !n;
 }
 
-function send() {
+function send() { go(2); }
+
+// Rebuilt whenever step 3 opens, so Ben's page always has the latest choices
+function buildLink() {
   state.sent = chosen().map(c => ({ ...c, id: clipId(c) }));
   const pack = { t: LESSON.title, n: state.note, c: state.sent.map(c => [c.id, c.zh, c.py, c.en, c.kind, c.star ? 1 : 0]) };
-  state.link = "student.html#" + encodePack(pack);
-  writeResults({});
-  go(2);
+  const link = "student.html#" + encodePack(pack);
+  if (link !== state.link) writeResults({});
+  state.link = link;
 }
 
 function renderSend() {
   const url = new URL(state.link, location.href).href;
   $("view").innerHTML = `<div class="split">
     <div class="phone"><iframe src="${state.link}" title="Ben's practice page"></iframe></div>
-    <section class="panel"><h2>This is Ben's real page</h2>
-      <p class="hint">It has the cards and edits you just chose, your starred cards first, and your message on top. Try a few cards and mark some as “Again”.</p>
+    <section class="panel"><h2>Here's what Ben gets</h2>
+      <p class="hint">Nothing has gone to Ben yet. Try a few cards as Ben and tap Again on some. Then send him the link.</p>
       <div class="stack" style="margin-top:14px">
-        <button type="button" class="btn ghost" id="copy">Copy Ben's link</button>
-        <a class="btn ghost" href="${state.link}" target="_blank" rel="noopener">Open full page</a>
-        <button type="button" class="btn" id="next">See Ben's results</button>
+        <button type="button" class="btn" id="copy">Copy Ben's link</button>
+        <p class="hint" id="copied" hidden>Copied. Paste it in your chat with Ben.</p>
+        <button type="button" class="btn ghost" id="next">See Ben's results</button>
       </div></section></div>`;
   $("copy").onclick = async e => {
-    try { await navigator.clipboard.writeText(url); e.target.textContent = "Copied"; }
+    try { await navigator.clipboard.writeText(url); $("copied").hidden = false; }
     catch (err) { prompt("Copy Ben's link:", url); }
   };
   $("next").onclick = () => go(3);
@@ -198,24 +206,26 @@ function renderResults() {
   const r = readResults();
   const done = state.sent.filter(c => r[c.id]);
   const hard = state.sent.filter(c => r[c.id] && r[c.id].again);
-  const got = done.filter(c => r[c.id].got);
+  const got = done.filter(c => r[c.id].got && !r[c.id].again);
   $("view").innerHTML = `<section class="panel">
-      ${whoHTML("Before your next lesson")}
+      ${whoHTML("Since today's lesson")}
       <div class="stats">
         <div class="stat"><b>${done.length} / ${state.sent.length}</b><span>practised</span></div>
-        <div class="stat"><b>${got.length}</b><span>got it</span></div>
+        <div class="stat"><b>${got.length}</b><span>got it first try</span></div>
         <div class="stat"><b>${hard.length}</b><span>needed another try</span></div>
       </div>
       <h2>Start the next lesson with these</h2>
       ${hard.length ? hard.map(c => `<div class="miss"><div class="zh">${esc(c.zh)}</div><div class="py">${esc(c.py)} · ${esc(c.en)}</div></div>`).join("")
-        : `<p class="hint">${done.length ? "Nothing to go over yet." : "Nothing yet. Practise a few cards on Ben's page and mark some as “Again”."}</p>`}
-      <p class="hint">Prototype: results only show if Ben's page was opened in this browser. A real version would send them to the tutor from any device.</p>
+        : done.length ? `<p class="hint">Nothing to go over yet.</p>`
+        : `<p class="hint">Nothing yet. Try some cards as Ben.</p><button type="button" class="btn" data-go="2" style="margin-top:10px">Back to Ben's page</button>`}
+      <p class="hint">Prototype: these are your own taps from step 3. In the real app, Ben's appear here.</p>
     </section>
     <button type="button" class="btn ghost" id="restart">Start again</button>`;
   $("restart").onclick = () => location.reload();
 }
 
 function render() {
+  $("intro").hidden = state.step !== 0;
   renderSteps();
   [renderAdd, renderReview, renderSend, renderResults][state.step]();
 }
