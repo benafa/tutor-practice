@@ -79,8 +79,8 @@ textarea { min-height: 84px; resize: vertical; }
 <script>
 const STEPS = ["1 · Add lesson", "2 · Review", "3 · Send", "4 · Results"];
 const STARRED = ["我做了按摩。", "我没有做按摩。"];
-const cards = LESSON.cards.map(c => ({ ...c, on: c.core, star: STARRED.includes(c.zh) }));
-const state = { step: 0, reached: 0, showMore: false, note: "Nice work today! Spend a few minutes on 了 and 没有 before our next lesson.", sent: [], link: "" };
+const cards = LESSON.cards.map(c => ({ ...c, on: true, star: STARRED.includes(c.zh) }));
+const state = { step: 0, reached: 0, note: "Nice work today! Spend a few minutes on 了 and 没有 before our next lesson.", sent: [], link: "" };
 let added = 0;
 
 const chosen = () => cards.filter(c => c.on);
@@ -111,7 +111,7 @@ function renderAdd() {
 }
 
 function work() {
-  const lines = ["Reading " + LESSON.file, "Pulling out sentences and words", "Picking the best cards to start with"];
+  const lines = ["Reading " + LESSON.file, "Pulling out sentences and words", "Making practice cards"];
   $("view").innerHTML = `<section class="panel working" aria-live="polite">${lines.map(l => `<p>${esc(l)}</p>`).join("")}</section>`;
   const ps = [...document.querySelectorAll(".working p")];
   let i = 0;
@@ -142,13 +142,10 @@ function sectionHTML(title, list) {
 }
 
 function renderReview() {
-  const core = cards.filter(c => c.core), more = cards.filter(c => !c.core);
-  $("view").innerHTML = `<section class="panel"><h2>Here's a starter set from your lesson</h2>
+  $("view").innerHTML = `<section class="panel"><h2>Here are all the cards from your lesson</h2>
       <p class="hint">Tap any text to fix it. Tap ★ First on what Ben should practise first. Untick anything you don't want to send.</p>
       <details class="notes"><summary>Your notes: ${esc(LESSON.file)}</summary><pre>${esc(LESSON.notes)}</pre></details></section>
-    <section class="panel">${sectionHTML("Sentences", core.filter(c => c.kind === "s"))}${sectionHTML("Words", core.filter(c => c.kind === "w"))}</section>
-    <section class="panel"><details id="more"${state.showMore ? " open" : ""}><summary>More from this lesson (${more.length})</summary>
-      ${sectionHTML("Sentences", more.filter(c => c.kind === "s"))}${sectionHTML("Words", more.filter(c => c.kind === "w"))}</details></section>
+    <section class="panel">${sectionHTML("Sentences", cards.filter(c => c.kind === "s"))}${sectionHTML("Words", cards.filter(c => c.kind === "w"))}</section>
     <section class="panel"><h2>Add a card</h2><form class="add" id="add">
       <input id="newzh" placeholder="Chinese" aria-label="Chinese" required>
       <input id="newpy" placeholder="Pinyin" aria-label="Pinyin" required>
@@ -157,7 +154,6 @@ function renderReview() {
     <section class="panel"><label class="lab" for="note">Message to Ben</label><textarea id="note">${esc(state.note)}</textarea></section>
     <div class="bar"><button type="button" class="btn" id="send"></button></div>`;
   updateCount();
-  $("more").ontoggle = e => { state.showMore = e.target.open; };
   $("note").oninput = e => { state.note = e.target.value; };
   $("add").onsubmit = e => {
     e.preventDefault();
