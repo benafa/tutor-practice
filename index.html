@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Tutor Practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Noto+Serif+SC:wght@500;700&display=swap">
+<link rel="stylesheet" href="app.css">
+<style>
+.banner { background: var(--accent-soft); color: var(--accent-text); padding: 9px 16px; font-size: .875rem; font-weight: 500; text-align: center; }
+.wrap { max-width: 760px; margin: 0 auto; padding: 24px 16px 64px; }
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; list-style: none; padding: 0; margin: 0 0 24px; }
+.steps button { width: 100%; min-height: 44px; padding: 6px 4px; border: 0; border-top: 3px solid var(--line); background: none; color: var(--muted); font-size: .8rem; font-weight: 600; line-height: 1.2; }
+.steps button[aria-current="step"] { color: var(--accent-text); border-color: var(--accent); }
+.steps button.seen { border-color: var(--accent); }
+.steps button:disabled { cursor: default; opacity: .65; }
+.who { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.avatar { width: 44px; height: 44px; flex: none; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); font-weight: 700; }
+.who b { display: block; line-height: 1.25; }
+.who span { color: var(--muted); font-size: .875rem; }
+.drop { display: block; width: 100%; padding: 36px 16px; border: 2px dashed var(--line); border-radius: 14px; background: var(--bg); text-align: center; }
+.drop:hover { border-color: var(--accent); }
+.drop b { display: block; font-size: 1.05rem; }
+.drop span { color: var(--muted); font-size: .9rem; }
+.working { text-align: center; padding: 32px 8px; }
+.working p { margin: 8px 0; color: var(--muted); }
+.working p.on { color: var(--ink); font-weight: 600; }
+.working p.done { color: var(--accent-text); }
+.notes { margin-top: 10px; }
+summary { min-height: 44px; display: flex; align-items: center; font-weight: 600; cursor: pointer; }
+.notes pre { margin: 0; padding: 12px; border-radius: 10px; background: var(--bg); font: 400 .95rem/1.7 var(--font-hanzi); white-space: pre-wrap; overflow-wrap: anywhere; }
+.row { display: grid; grid-template-columns: 24px minmax(0,1fr) auto; gap: 8px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+.row input[type=checkbox] { width: 22px; height: 22px; margin: 0; accent-color: var(--accent); }
+.row.off .tx { opacity: .45; }
+.tx input { display: block; width: 100%; padding: 1px 6px; margin-left: -6px; border: 1px solid transparent; border-radius: 6px; background: transparent; }
+.tx input:hover, .tx input:focus { border-color: var(--line); background: var(--bg); }
+.tx .f-zh { font-family: var(--font-hanzi); font-size: 1.15rem; font-weight: 500; }
+.tx .f-py { color: var(--muted); font-size: .875rem; }
+.tx .f-en { font-size: .95rem; }
+.acts { display: flex; gap: 6px; align-items: center; }
+.first { min-height: 44px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--muted); font-size: .8rem; font-weight: 700; white-space: nowrap; }
+.first[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.add { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)) auto; gap: 8px; }
+.add input, textarea { width: 100%; min-height: 44px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+textarea { min-height: 84px; resize: vertical; }
+.add .btn { width: auto; min-height: 44px; padding: 6px 16px; }
+.lab { display: block; font-weight: 600; margin-bottom: 6px; }
+.bar { position: sticky; bottom: 0; padding: 12px 0 calc(12px + env(safe-area-inset-bottom)); background: linear-gradient(transparent, var(--bg) 22%); }
+.split { display: grid; grid-template-columns: 340px minmax(0,1fr); gap: 20px; align-items: start; }
+.phone { width: 100%; max-width: 340px; margin: 0 auto; border: 8px solid var(--ink); border-radius: 30px; overflow: hidden; background: var(--bg); }
+.phone iframe { display: block; width: 100%; height: 620px; border: 0; }
+.stack { display: grid; gap: 10px; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+.stat { background: var(--bg); border-radius: 12px; padding: 12px 8px; text-align: center; }
+.stat b { display: block; font-size: 1.5rem; line-height: 1.1; }
+.stat span { color: var(--muted); font-size: .8rem; }
+.miss { padding: 8px 0; border-top: 1px solid var(--line); }
+@media (max-width: 680px) {
+  .split { grid-template-columns: minmax(0,1fr); }
+  .panel { padding: 16px; }
+  .add { grid-template-columns: minmax(0,1fr); }
+  .add .btn { width: 100%; }
+}
+</style>
+</head>
+<body>
+<div class="banner">Prototype. It loads one real lesson that's already been prepared.</div>
+<main class="wrap">
+  <h1>Turn a lesson into practice</h1>
+  <p class="sub">You're the tutor. Add a lesson, choose what your student Ben should practise, and send it to him.</p>
+  <ol class="steps" id="steps"></ol>
+  <div id="view"></div>
+</main>
+<script src="shared.js"></script>
+<script src="lesson.js"></script>
+<script>
+const STEPS = ["1 · Add lesson", "2 · Review", "3 · Send", "4 · Results"];
+const STARRED = ["我做了按摩。", "我没有做按摩。"];
+const cards = LESSON.cards.map(c => ({ ...c, on: c.core, star: STARRED.includes(c.zh) }));
+const state = { step: 0, reached: 0, showMore: false, note: "Nice work today! Spend a few minutes on 了 and 没有 before our next lesson.", sent: [], link: "" };
+let added = 0;
+
+const chosen = () => cards.filter(c => c.on);
+const byId = id => cards.find(c => c.id === id);
+
+function go(n) {
+  player.pause();
+  state.step = n; state.reached = Math.max(state.reached, n);
+  render(); window.scrollTo(0, 0);
+}
+
+function renderSteps() {
+  $("steps").innerHTML = STEPS.map((s, i) =>
+    `<li><button type="button" data-go="${i}" class="${i <= state.reached ? "seen" : ""}"${i === state.step ? ' aria-current="step"' : ""}${i > state.reached ? " disabled" : ""}>${s}</button></li>`).join("");
+}
+
+function whoHTML(extra) {
+  return `<div class="who"><div class="avatar" aria-hidden="true">B</div><div><b>Ben</b><span>${extra}</span></div></div>`;
+}
+
+function renderAdd() {
+  $("view").innerHTML = `<section class="panel">
+    ${whoHTML("Beginner Mandarin")}
+    <button type="button" class="drop" id="drop"><b>Add today's lesson</b><span>PDF, slides or notes</span></button>
+    <p class="hint">In this prototype, this loads real lesson notes: “${esc(LESSON.file)}”.</p>
+  </section>`;
+  $("drop").onclick = work;
+}
+
+function work() {
+  const lines = ["Reading " + LESSON.file, "Pulling out sentences and words", "Picking the best cards to start with"];
+  $("view").innerHTML = `<section class="panel working" aria-live="polite">${lines.map(l => `<p>${esc(l)}</p>`).join("")}</section>`;
+  const ps = [...document.querySelectorAll(".working p")];
+  let i = 0;
+  const tick = () => {
+    ps.forEach((p, j) => { p.className = j < i ? "done" : j === i ? "on" : ""; });
+    if (i++ < lines.length) setTimeout(tick, 650); else go(1);
+  };
+  tick();
+}
+
+function rowHTML(c) {
+  return `<div class="row${c.on ? "" : " off"}" data-row="${c.id}">
+    <input type="checkbox" data-card="${c.id}" aria-label="Include ${esc(c.zh)}"${c.on ? " checked" : ""}>
+    <div class="tx">
+      <input class="f-zh" data-field="zh" data-id="${c.id}" value="${esc(c.zh)}" aria-label="Chinese">
+      <input class="f-py" data-field="py" data-id="${c.id}" value="${esc(c.py)}" aria-label="Pinyin">
+      <input class="f-en" data-field="en" data-id="${c.id}" value="${esc(c.en)}" aria-label="English">
+    </div>
+    <div class="acts">
+      <button type="button" class="first" data-star="${c.id}" aria-pressed="${c.star}">★ First</button>
+      <button type="button" class="say" data-say="${c.id}" aria-label="Play ${esc(c.zh)}">${ICON_SOUND}</button>
+    </div>
+  </div>`;
+}
+
+function sectionHTML(title, list) {
+  return list.length ? `<h2 style="margin-top:14px">${title}</h2>${list.map(rowHTML).join("")}` : "";
+}
+
+function renderReview() {
+  const core = cards.filter(c => c.core), more = cards.filter(c => !c.core);
+  $("view").innerHTML = `<section class="panel"><h2>Here's a starter set from your lesson</h2>
+      <p class="hint">Tap any text to fix it. Tap ★ First on what Ben should practise first. Untick anything you don't want to send.</p>
+      <details class="notes"><summary>Your notes: ${esc(LESSON.file)}</summary><pre>${esc(LESSON.notes)}</pre></details></section>
+    <section class="panel">${sectionHTML("Sentences", core.filter(c => c.kind === "s"))}${sectionHTML("Words", core.filter(c => c.kind === "w"))}</section>
+    <section class="panel"><details id="more"${state.showMore ? " open" : ""}><summary>More from this lesson (${more.length})</summary>
+      ${sectionHTML("Sentences", more.filter(c => c.kind === "s"))}${sectionHTML("Words", more.filter(c => c.kind === "w"))}</details></section>
+    <section class="panel"><h2>Add a card</h2><form class="add" id="add">
+      <input id="newzh" placeholder="Chinese" aria-label="Chinese" required>
+      <input id="newpy" placeholder="Pinyin" aria-label="Pinyin" required>
+      <input id="newen" placeholder="English" aria-label="English" required>
+      <button class="btn" type="submit">Add</button></form></section>
+    <section class="panel"><label class="lab" for="note">Message to Ben</label><textarea id="note">${esc(state.note)}</textarea></section>
+    <div class="bar"><button type="button" class="btn" id="send"></button></div>`;
+  updateCount();
+  $("more").ontoggle = e => { state.showMore = e.target.open; };
+  $("note").oninput = e => { state.note = e.target.value; };
+  $("add").onsubmit = e => {
+    e.preventDefault();
+    const zh = $("newzh").value.trim();
+    cards.push({ id: "new" + (++added), zh, py: $("newpy").value.trim(), en: $("newen").value.trim(), kind: /[。？！]/.test(zh) ? "s" : "w", core: true, on: true, star: false });
+    render();
+  };
+  $("send").onclick = send;
+}
+
+function updateCount() {
+  const n = chosen().length, b = $("send");
+  b.textContent = `Send ${n} card${n === 1 ? "" : "s"} to Ben`;
+  b.disabled = !n;
+}
+
+function send() {
+  state.sent = chosen();
+  const pack = { t: LESSON.title, n: state.note, c: state.sent.map(c => [c.id, c.zh, c.py, c.en, c.kind, c.star ? 1 : 0]) };
+  state.link = "student.html#" + encodePack(pack);
+  writeResults({});
+  go(2);
+}
+
+function renderSend() {
+  const url = new URL(state.link, location.href).href;
+  $("view").innerHTML = `<div class="split">
+    <div class="phone"><iframe src="${state.link}" title="Ben's practice page"></iframe></div>
+    <section class="panel"><h2>This is Ben's real page</h2>
+      <p class="hint">It has the cards and edits you just chose, your starred cards first, and your message on top. Try a few cards and mark some as “Again”.</p>
+      <div class="stack" style="margin-top:14px">
+        <button type="button" class="btn ghost" id="copy">Copy Ben's link</button>
+        <a class="btn ghost" href="${state.link}" target="_blank" rel="noopener">Open full page</a>
+        <button type="button" class="btn" id="next">See Ben's results</button>
+      </div></section></div>`;
+  $("copy").onclick = async e => {
+    try { await navigator.clipboard.writeText(url); e.target.textContent = "Copied"; }
+    catch (err) { prompt("Copy Ben's link:", url); }
+  };
+  $("next").onclick = () => go(3);
+}
+
+function renderResults() {
+  const r = readResults();
+  const done = state.sent.filter(c => r[c.id]);
+  const hard = state.sent.filter(c => r[c.id] && r[c.id].again);
+  const got = done.filter(c => r[c.id].got);
+  $("view").innerHTML = `<section class="panel">
+      ${whoHTML("Before your next lesson")}
+      <div class="stats">
+        <div class="stat"><b>${done.length} / ${state.sent.length}</b><span>practised</span></div>
+        <div class="stat"><b>${got.length}</b><span>got it</span></div>
+        <div class="stat"><b>${hard.length}</b><span>needed another try</span></div>
+      </div>
+      <h2>Start the next lesson with these</h2>
+      ${hard.length ? hard.map(c => `<div class="miss"><div class="zh">${esc(c.zh)}</div><div class="py">${esc(c.py)} · ${esc(c.en)}</div></div>`).join("")
+        : `<p class="hint">${done.length ? "Nothing to go over yet." : "Nothing yet. Practise a few cards on Ben's page and mark some as “Again”."}</p>`}
+      <p class="hint">Prototype: results only show if Ben's page was opened in this browser. A real version would send them to the tutor from any device.</p>
+    </section>
+    <button type="button" class="btn ghost" id="restart">Start again</button>`;
+  $("restart").onclick = () => location.reload();
+}
+
+function render() {
+  renderSteps();
+  [renderAdd, renderReview, renderSend, renderResults][state.step]();
+}
+
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-go],[data-star],[data-say]");
+  if (!t) return;
+  if (t.dataset.go !== undefined) return go(Number(t.dataset.go));
+  if (t.dataset.say) { const c = byId(t.dataset.say); return playCard(c.id, c.zh); }
+  const c = byId(t.dataset.star);
+  c.star = !c.star;
+  t.setAttribute("aria-pressed", c.star);
+  if (c.star && !c.on) { c.on = true; const b = document.querySelector(`[data-card="${c.id}"]`); b.checked = true; b.closest(".row").classList.remove("off"); updateCount(); }
+});
+document.addEventListener("change", e => {
+  if (!e.target.dataset.card) return;
+  byId(e.target.dataset.card).on = e.target.checked;
+  e.target.closest(".row").classList.toggle("off", !e.target.checked);
+  updateCount();
+});
+document.addEventListener("input", e => {
+  const f = e.target.dataset.field;
+  if (f) byId(e.target.dataset.id)[f] = e.target.value;
+});
+window.addEventListener("storage", () => { if (state.step === 3) renderResults(); });
+
+render();
+</script>
+</body>
+</html>

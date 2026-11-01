@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Your Practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Noto+Serif+SC:wght@500;700&display=swap">
+<link rel="stylesheet" href="app.css">
+<style>
+.wrap { max-width: 560px; margin: 0 auto; padding: 18px 16px 40px; }
+.msg { background: var(--accent-soft); color: var(--accent-text); border-radius: 12px; padding: 10px 12px; font-size: .9rem; margin: 12px 0; overflow-wrap: anywhere; }
+.msg b { display: block; font-size: .75rem; }
+.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; padding: 3px; background: var(--line); border-radius: 12px; margin-bottom: 12px; }
+.tabs button { min-height: 42px; border: 0; border-radius: 10px; background: transparent; color: var(--muted); font-weight: 600; }
+.tabs button[aria-selected="true"] { background: var(--surface); color: var(--ink); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 10px; }
+.chip { min-height: 44px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-size: .85rem; font-weight: 600; }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.track { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; margin-bottom: 4px; }
+.fill { height: 100%; background: var(--accent); width: 0; }
+.count { color: var(--muted); font-size: .8rem; margin: 0 0 8px; }
+.card { min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; padding: 18px 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; margin-bottom: 10px; }
+.card .zh { font-size: 2rem; }
+.card .py { font-size: 1.05rem; color: var(--accent-text); font-weight: 600; }
+.card .eng { font-weight: 600; font-size: 1.05rem; }
+.badge { color: var(--accent-text); font-size: .75rem; font-weight: 700; }
+.acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.acts .wide { grid-column: 1 / -1; }
+.sec { margin-bottom: 18px; }
+.sec h2 { margin-bottom: 6px; }
+.rows { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+.line { display: flex; width: 100%; gap: 10px; align-items: center; justify-content: space-between; padding: 10px 12px; border: 0; border-top: 1px solid var(--line); background: none; text-align: left; }
+.line:first-child { border-top: 0; }
+.line .en { display: block; font-size: .9rem; }
+.line.on { background: var(--accent-soft); }
+.line svg { flex: none; color: var(--accent-text); }
+.tip { font-size: .95rem; margin: 10px 0 0; }
+.reveal { display: flex; width: 100%; min-height: 48px; justify-content: space-between; align-items: center; padding: 10px 12px; border: 0; border-top: 1px solid var(--line); background: none; text-align: left; }
+.rows > .reveal:first-child { border-top: 0; }
+.reveal em { color: var(--accent-text); font-style: normal; font-weight: 600; font-size: .85rem; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>Your practice, Ben</h1>
+  <p class="sub" id="lessonname" style="margin:0"></p>
+  <div class="msg" id="msg" hidden></div>
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" data-tab="practice">Practice</button>
+    <button type="button" role="tab" data-tab="notes">Lesson notes</button>
+  </div>
+  <div class="chips" id="options"></div>
+  <div id="view"></div>
+</main>
+<script src="shared.js"></script>
+<script src="lesson.js"></script>
+<script>
+const shared = decodePack(location.hash.slice(1));
+const pack = shared || { t: LESSON.title, n: "", c: LESSON.cards.filter(c => c.core).map(c => [c.id, c.zh, c.py, c.en, c.kind, 0]) };
+const cards = pack.c.map(([id, zh, py, en, kind, star]) => ({ id, zh, py, en, kind, star: !!star }));
+const state = { tab: "practice", filter: "all", voice: "m", slow: false, queue: [], shown: false, results: readResults() };
+
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const inFilter = c => state.filter === "all" || c.kind === state.filter;
+
+// Starred cards always come first; anything already marked Got it stays done
+function buildQueue() {
+  const left = cards.filter(c => inFilter(c) && !(state.results[c.id] && state.results[c.id].got));
+  state.queue = [...shuffle(left.filter(c => c.star)), ...shuffle(left.filter(c => !c.star))];
+  state.shown = false;
+}
+
+function optionsHTML() {
+  const chip = (label, attr, on) => `<button type="button" class="chip" ${attr} aria-pressed="${on}">${label}</button>`;
+  const filters = state.tab === "practice" ? [["all", "All"], ["w", "Words"], ["s", "Sentences"]].map(([k, l]) => chip(l, `data-filter="${k}"`, state.filter === k)).join("") : "";
+  return filters + chip(state.voice === "m" ? "Male voice" : "Female voice", "data-voice", false) + chip("Slow", "data-slow", state.slow);
+}
+
+function renderPractice() {
+  const list = cards.filter(inFilter);
+  const done = list.filter(c => state.results[c.id] && state.results[c.id].got).length;
+  const c = state.queue[0];
+  const top = `<div class="track"><div class="fill" style="width:${list.length ? done / list.length * 100 : 0}%"></div></div><p class="count">${done} of ${list.length} done</p>`;
+  if (!c) {
+    $("view").innerHTML = top + `<div class="card"><div class="eng">${list.length ? "All done. Nice work!" : "No cards here"}</div></div><button type="button" class="btn ghost" id="again">Practise again</button>`;
+    if ($("again")) $("again").onclick = () => {
+      list.forEach(x => { if (state.results[x.id]) state.results[x.id].got = false; });
+      writeResults(state.results); buildQueue(); render();
+    };
+    return;
+  }
+  $("view").innerHTML = top + `<div class="card">${c.star ? `<div class="badge">★ From your tutor</div>` : ""}
+      <div class="zh">${esc(c.zh)}</div><div class="py">${esc(c.py)}</div>${state.shown ? `<div class="eng">${esc(c.en)}</div>` : ""}
+      <button type="button" class="say" data-play="${c.id}" aria-label="Play">${ICON_SOUND}</button></div>
+    <div class="acts">${state.shown
+      ? `<button type="button" class="btn again" data-mark="0">Again</button><button type="button" class="btn" data-mark="1">Got it</button>`
+      : `<button type="button" class="btn wide" id="reveal">Show answer</button>`}</div>`;
+}
+
+function lineHTML(c) {
+  return `<button type="button" class="line" data-line="${c.id}" data-zh="${esc(c.zh)}"><span><span class="zh">${esc(c.zh)}</span><span class="py" style="display:block">${esc(c.py)}</span><span class="en">${esc(c.en)}</span></span>${ICON_SOUND}</button>`;
+}
+function bold(s) { return esc(s).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\[([^\]]+)\]\((https:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>'); }
+
+function renderNotes() {
+  const group = (title, list) => list.length ? `<section class="sec"><h2>${title}</h2><div class="rows">${list.map(lineHTML).join("")}</div></section>` : "";
+  const talk = LESSON.talk.map(r => ({ id: r.a, zh: r.zh, py: r.py, en: r.en }));
+  $("view").innerHTML = `<p style="margin:0 0 14px">You'll learn to ${bold(LESSON.goal)}</p>` +
+    group("Sentences", cards.filter(c => c.kind === "s")) + group("Words", cards.filter(c => c.kind === "w")) +
+    `<section class="sec"><h2>Conversation</h2><div class="rows">${talk.map(lineHTML).join("")}</div></section>` +
+    `<section class="sec"><h2>Test yourself</h2><div class="rows">${LESSON.test.map(r => `<button type="button" class="reveal" data-a="${r.a}" data-zh="${esc(r.zh)}" data-text="${esc(r.zh + "  " + r.py)}"><span>${esc(r.q)}</span><em>Show</em></button>`).join("")}</div></section>` +
+    `<section class="sec"><h2>Tips</h2>${LESSON.tips.map(t => `<p class="tip">${bold(t)}</p>`).join("")}</section>`;
+}
+
+function render() {
+  document.querySelectorAll(".tabs button").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === state.tab));
+  $("options").innerHTML = optionsHTML();
+  if (state.tab === "practice") renderPractice(); else renderNotes();
+}
+
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-tab],[data-filter],[data-voice],[data-slow],[data-play],[data-mark],[data-line],#reveal,.reveal");
+  if (!t) return;
+  if (t.dataset.tab) { player.pause(); state.tab = t.dataset.tab; return render(); }
+  if (t.dataset.filter) { state.filter = t.dataset.filter; buildQueue(); return render(); }
+  if (t.hasAttribute("data-voice")) { state.voice = state.voice === "m" ? "f" : "m"; return render(); }
+  if (t.hasAttribute("data-slow")) { state.slow = !state.slow; return render(); }
+  if (t.dataset.play) return playCard(t.dataset.play, state.queue[0].zh, state.voice, state.slow);
+  if (t.dataset.line) {
+    document.querySelectorAll(".line.on").forEach(x => x.classList.remove("on"));
+    t.classList.add("on");
+    return playCard(t.dataset.line, t.dataset.zh, state.voice, state.slow, () => t.classList.remove("on"));
+  }
+  if (t.classList.contains("reveal")) {
+    t.querySelector("span").textContent = t.dataset.text;
+    t.querySelector("em").textContent = "";
+    return playCard(t.dataset.a, t.dataset.zh, state.voice, state.slow);
+  }
+  if (t.id === "reveal") { state.shown = true; const c = state.queue[0]; playCard(c.id, c.zh, state.voice, state.slow); return renderPractice(); }
+  const c = state.queue.shift(), got = t.dataset.mark === "1";
+  const r = state.results[c.id] = state.results[c.id] || { got: false, again: 0 };
+  if (got) r.got = true; else { r.again++; state.queue.push(c); }
+  writeResults(state.results);
+  state.shown = false;
+  renderPractice();
+});
+
+$("lessonname").textContent = pack.t;
+if (pack.n) { $("msg").hidden = false; $("msg").innerHTML = `<b>From your tutor</b>${esc(pack.n)}`; }
+buildQueue();
+render();
+</script>
+</body>
+</html>
