@@ -59,7 +59,7 @@
 <script src="lesson.js"></script>
 <script>
 const shared = decodePack(location.hash.slice(1));
-const pack = shared || { t: LESSON.title, n: "", c: LESSON.cards.filter(c => c.core).map(c => [c.id, c.zh, c.py, c.en, c.kind, 0]) };
+const pack = shared || { t: LESSON.title, n: "", c: LESSON.cards.map(c => [c.id, c.zh, c.py, c.en, c.kind, 0]) };
 const cards = pack.c.map(([id, zh, py, en, kind, star]) => ({ id, zh, py, en, kind, star: !!star }));
 const state = { tab: "practice", filter: "all", voice: "m", slow: false, queue: [], shown: false, results: readResults() };
 
